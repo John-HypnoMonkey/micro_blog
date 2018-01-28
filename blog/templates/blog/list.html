@@ -1,0 +1,23 @@
+{% for item in list %}
+    <p><a href="{% url 'blog:post' item.id %}">{{ item.pub_date }} {{ item.title_text }}</a></p>
+    <p>Author: <a href="{% url 'blog:userposts' item.user.username %}">{{ item.user.username }}</a></p>
+    <p>{{ item.content_text|truncatewords_html:50 }}</p>
+{% endfor %}
+    <div class="text-center">
+        <ul class="pagination">
+                {% if list.has_previous %}
+                   <li> <a href="?page={{ list.previous_page_number }}">previous</a></li>
+                {% endif %}
+                {% for item in num_pages %}
+                    {% if list.number == item %}
+                        <li class="active"><a href="#">{{ item }}</a></li>
+                    {% else %}
+                        <li><a href="?page={{ item }}">{{ item }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if list.has_next %}
+                  <li>   <a href="?page={{ list.next_page_number }}">next</a> </li>
+                {% endif %}
+        </ul>
+    </div>

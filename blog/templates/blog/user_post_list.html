@@ -1,0 +1,14 @@
+{% extends "blog/base.html" %}
+{% block title %}
+  <title>Posts</title>
+{% endblock %}
+
+{% block content %}
+  <h1>{{ user_name }} posts</h1>
+  {% if list %}
+    {% include 'blog/list.html' %}
+  {% else %}
+    <p>There are no posts yet.</p>
+  {% endif %}
+{% endblock %}
+

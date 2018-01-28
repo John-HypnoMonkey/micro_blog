@@ -1,0 +1,14 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}
+{% endblock %}
+
+{% block content %}
+  <h1> Lastest posts: </h1>
+  {% if list %}
+    {% include 'blog/list.html' %}
+  {% else %}
+    <h3>There are no posts yet</h3>
+  {% endif %}
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "blog/base.html" %}
+{% block title %}
+  <title>Search results</title>
+{% endblock %}
+
+{% block content %}
+  <h1> Search results: </h1>
+  {% if list %}
+    {% include "blog/list.html" %}
+  {% else %}
+    <br>
+    <h3>No results found</h3>
+  {% endif %}  
+{% endblock %}

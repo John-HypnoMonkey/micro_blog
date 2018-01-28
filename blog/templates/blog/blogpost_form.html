@@ -1,0 +1,15 @@
+{% extends "blog/base.html" %}
+{% block title %}
+  <title>Add new post</title>
+{% endblock %}
+{% block content %}
+<form class="form-horizontal" action="" method="POST" encrypt="multipart/from-data">
+  {% csrf_token %}
+  {% include "blog/form-template.html" %}
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-success" />Save</button>
+    </div>
+  </div>
+</form>
+{% endblock %}
