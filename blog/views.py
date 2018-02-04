@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from .forms import UserForm, BlogPostForm
-from .models import BlogPost
+from .forms import UserForm, BlogPostForm, BlogPostCommentForm
+from .models import BlogPost, BlogPostComment
 from django.db.models import Q
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 # Create your views here.
@@ -118,16 +119,19 @@ class BlogPostCreate(CreateView):
             new_post = form.save(commit=False)
             new_post.user_id = request.user.id
             new_post.save()
-        return redirect('blog:index')
+        return redirect('blog:post', blogpost_id = new_post.id)
 
 
 def userPostList(request, user_name):
 
     if user_name == "my":
-        user_name = request.user.username
+        user_id = request.user.id
+    else:
+        user_of_post = get_object_or_404(User, username=user_name)
+        user_id = user_of_post.id
 
-    post_list = BlogPost.objects.filter(user__username__contains=\
-            user_name).order_by('-pub_date')[::-1]
+    post_list = BlogPost.objects.filter(user__id__exact=\
+            user_id).order_by('-pub_date')[::-1]
     paginator = Paginator(post_list, 2)
     page = request.GET.get('page')
     try:
@@ -147,6 +151,20 @@ def userPostList(request, user_name):
 
 
 def blogPost(request, blogpost_id):
-    post = get_object_or_404(BlogPost, pk=blogpost_id)
-    context = {'post': post}
-    return render(request, "blog/BlogPost.html", context)
+    form_class = BlogPostCommentForm
+    if request.method == 'POST':
+        form = form_class(request.POST)
+        if form.is_valid():
+            new_comment = form.save(commit=False)
+            new_comment.user_id = request.user.id
+            new_comment.blogpost_id = blogpost_id
+            new_comment.save()
+        return redirect('blog:post', blogpost_id=blogpost_id)
+    form = form_class(None)
+    template_name = "blog/BlogPost.html"
+    blogpost_id = blogpost_id
+    blogpost = get_object_or_404(BlogPost, pk=blogpost_id)
+    comments = BlogPostComment.objects.filter(blogpost__id__exact=\
+            blogpost_id).order_by('-pub_date')
+    context = {'blogpost': blogpost, 'comments': comments,'form': form}
+    return render(request, template_name, context)

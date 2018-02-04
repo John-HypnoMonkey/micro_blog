@@ -1,11 +1,31 @@
 {% extends 'blog/base.html' %}
 {% block title %}
-<title>{{ post.title_text }}</title>
+  <title>{{ blogpost.title_text }}</title>
 {% endblock %}
 
 {% block content %}
-<h2>{{ post.title_text }}</h2>
-<p>{{ post.pub_date }}</p>
-<p>Author: <a href="#">{{ post.user.username }}</a></p>
-<span>{{ post.content_text }}</span
-{% endblock %}>
+  <h2>{{ blogpost.title_text }}</h2>
+  <p>{{ blogpost.pub_date }}</p>
+  <p>Author: <a href="#">{{ blogpost.user.username }}</a></p>
+  <span>{{ blogpost.content_text }}</span>
+  <br /><br /><br />
+  <b>Comments:</b>
+  {% if comments %}
+    {% for item in comments %}
+      <p>{{ item.pub_date }}<a href="{% url 'blog:userposts' item.user.username %}"> {{ item.user.username }} </a> wrote:<p>
+      <p> {{ item.content_text }} </p>
+      <br />
+    {% endfor %}
+  {% else %}
+    <p>There are no comments yet</p>
+  {% endif %}
+    <form class="form-horizontal" action="" method="POST" encrypt="multipart/from-data">
+        {% csrf_token %}
+        {% include "blog/form-template.html" %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-sucess" />Add comment</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -4,3 +4,4 @@ Features: <br />
 -registration <br />
 -search <br />
 -pagination <br />
+-comments to posts <br />

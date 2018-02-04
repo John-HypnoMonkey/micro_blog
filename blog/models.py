@@ -9,3 +9,12 @@ class BlogPost(models.Model):
     title_text = models.CharField(max_length=200)
     content_text = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title_text
+
+class BlogPostComment(models.Model):
+    pub_date = models.DateField(auto_now_add=True)
+    content_text = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    blogpost = models.ForeignKey(BlogPost, on_delete=models.CASCADE)
