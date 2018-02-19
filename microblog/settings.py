@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'bootstrap3',
     'captcha',
+    'rest_framework',
     'blog.apps.BlogConfig',
     'django.contrib.admin',
     'django.contrib.auth',

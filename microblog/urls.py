@@ -15,9 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+import blog.views as blog_views
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('blog.urls')),
     path('captcha/', include('captcha.urls')),
+    path('blogposts/', blog_views.BlogPostAPIList.as_view()),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

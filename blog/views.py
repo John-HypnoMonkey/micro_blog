@@ -7,12 +7,21 @@ from .forms import UserForm, BlogPostForm, BlogPostCommentForm
 from .models import BlogPost, BlogPostComment
 from django.db.models import Q
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import BlogPostSerializer
+
 # Create your views here.
 
 
-def index(request):
-    last_posts_list = BlogPost.objects.order_by("-pub_date")[::-1]
-    paginator = Paginator(last_posts_list, 2)
+def get_paginator(request, list_of_items, count_per_page):
+    """ Takes request, list of items and count of items per page.
+
+    Returns correct list of items for current page, and
+    a number of the page
+    """
+    paginator = Paginator(list_of_items, count_per_page)
     page = request.GET.get('page')
     try:
         current_post_list = paginator.page(page)
@@ -21,7 +30,12 @@ def index(request):
     except EmptyPage:
         current_post_list = paginator.page(paginator.num_pages)
     num_pages = range(1, paginator.num_pages+1)
+    return current_post_list, num_pages
 
+
+def index(request):
+    last_post_list = BlogPost.objects.order_by("-pub_date")[::-1]
+    current_post_list, num_pages = get_paginator(request, last_post_list, 2)
     context = {
             'list': current_post_list,
             'num_pages': num_pages
@@ -33,7 +47,6 @@ def login_process(request):
     username = request.POST['username']
     password = request.POST['password']
     user = authenticate(request, username=username, password=password)
-    # тут поставлю try except и возвращение ошибки если имя или пароль не те
     if user is not None:
         if user.is_active:
             login(request, user)
@@ -55,16 +68,7 @@ def search_process(request):
         | Q(content_text__icontains=search)
         | Q(pub_date__contains=search))
 
-    paginator = Paginator(search_list, 2)
-    page = request.GET.get('page')
-    try:
-        current_post_list = paginator.page(page)
-    except PageNotAnInteger:
-        current_post_list = paginator.page(1)
-    except EmptyPage:
-        current_post_list = paginator.page(paginator.num_pages)
-    num_pages = range(1, paginator.num_pages+1)
-
+    current_post_list, num_pages = get_paginator(request, search_list, 2)
     context = {
             'list': current_post_list,
             'num_pages': num_pages
@@ -105,6 +109,7 @@ class UserFormView(View):
 
 
 class BlogPostCreate(CreateView):
+    """Creates new post """
     form_class = BlogPostForm
     template_name = "blog/blogpost_form.html"
 
@@ -119,11 +124,11 @@ class BlogPostCreate(CreateView):
             new_post = form.save(commit=False)
             new_post.user_id = request.user.id
             new_post.save()
-        return redirect('blog:post', blogpost_id = new_post.id)
+        return redirect('blog:post', blogpost_id=new_post.id)
 
 
 def userPostList(request, user_name):
-
+    """Returns render of all posts of a specific user"""
     if user_name == "my":
         user_id = request.user.id
     else:
@@ -132,16 +137,8 @@ def userPostList(request, user_name):
 
     post_list = BlogPost.objects.filter(user__id__exact=\
             user_id).order_by('-pub_date')[::-1]
-    paginator = Paginator(post_list, 2)
-    page = request.GET.get('page')
-    try:
-        current_post_list = paginator.page(page)
-    except PageNotAnInteger:
-        current_post_list = paginator.page(1)
-    except EmptyPage:
-        current_post_list = paginator.page(paginator.num_pages)
-    num_pages = range(1, paginator.num_pages+1)
 
+    current_post_list, num_pages = get_paginator(request, post_list, 2)
     context = {
             'list': current_post_list,
             'num_pages': num_pages,
@@ -166,5 +163,17 @@ def blogPost(request, blogpost_id):
     blogpost = get_object_or_404(BlogPost, pk=blogpost_id)
     comments = BlogPostComment.objects.filter(blogpost__id__exact=\
             blogpost_id).order_by('-pub_date')
-    context = {'blogpost': blogpost, 'comments': comments,'form': form}
+    context = {'blogpost': blogpost, 'comments': comments, 'form': form}
     return render(request, template_name, context)
+
+
+class BlogPostAPIList(APIView):
+    """ Lists all objects of Blogpost class to api """
+
+    def get(self, request):
+        blogposts = BlogPost.objects.all()
+        serializer = BlogPostSerializer(blogposts, many=True)
+        return Response(serializer.data)
+
+    def post(self):
+        pass
