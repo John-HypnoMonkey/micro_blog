@@ -10,7 +10,8 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import BlogPostSerializer
+from rest_framework.decorators import api_view
+from .serializers import BlogPostSerializer, UserWithPostListSerializer
 
 # Create your views here.
 
@@ -167,7 +168,7 @@ def blogPost(request, blogpost_id):
     return render(request, template_name, context)
 
 
-class BlogPostAPIList(APIView):
+class AllBlogPostAPI(APIView):
     """ Lists all objects of Blogpost class to api """
 
     def get(self, request):
@@ -177,3 +178,17 @@ class BlogPostAPIList(APIView):
 
     def post(self):
         pass
+
+
+@api_view(['GET'])
+def blogPostAPI(request, blogpost_id):
+    blogpost = get_object_or_404(BlogPost, pk=blogpost_id)
+    serializer = BlogPostSerializer(blogpost, many=False)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def userBlogPostListAPI(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    serializer = UserWithPostListSerializer(user)
+    return Response(serializer.data)

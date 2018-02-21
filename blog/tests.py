@@ -12,26 +12,41 @@ class BlogPostViewsTestCase(TestCase):
         """
         Testing the main page
         """
-        response = self.client.get(reverse("blog:index"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('list' in response.context)
-        self.assertTrue('num_pages' in response.context)
+        my_response = self.client.get(reverse("blog:index"))
+        self.assertEqual(my_response.status_code, 200)
+        self.assertTrue('list' in my_response.context)
+        self.assertTrue('num_pages' in my_response.context)
 
     def test_BlogPost(self):
         """
         Testing the detail page of some post
         """
-        response = self.client.get(reverse("blog:post",
-                                           kwargs={'blogpost_id': 1}))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('blogpost' in response.context)
-        self.assertTrue('comments' in response.context)
-        blogpost = response.context['blogpost']
+        my_response = self.client.get(reverse("blog:post",
+                                              kwargs={'blogpost_id': 1}))
+        self.assertEqual(my_response.status_code, 200)
+        self.assertTrue('blogpost' in my_response.context)
+        self.assertTrue('comments' in my_response.context)
+        blogpost = my_response.context['blogpost']
         self.assertEqual(blogpost.pk, 1)
-        comments = response.context['comments']
+        comments = my_response.context['comments']
         self.assertEqual(comments[0].pk, 1)
 
         # Ensure that non-existent posts throw a 404
-        response = self.client.get(reverse("blog:post",
-                                           kwargs={'blogpost_id': 999}))
-        self.assertEqual(response.status_code, 404)
+        my_response = self.client.get(reverse("blog:post",
+                                              kwargs={'blogpost_id': 999}))
+        self.assertEqual(my_response.status_code, 404)
+
+    # tests for RestAPI views
+    def test_AllBlogPostAPI(self):
+        my_response = self.client.get(reverse("allblogpostapi"))
+        self.assertEqual(my_response.status_code, 200)
+
+    def test_BlogPostAPI(self):
+        my_response = self.client.get(reverse("blogpostapi",
+                                              kwargs={'blogpost_id': 1}))
+        self.assertEqual(my_response.status_code, 200)
+
+    def test_UserBlogPostListiAPI(self):
+        my_response = self.client.get(reverse("userpostlist",
+                                              kwargs={'user_id': 1}))
+        self.assertEqual(my_response.status_code, 200)

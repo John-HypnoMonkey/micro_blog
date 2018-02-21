@@ -22,7 +22,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('blog.urls')),
     path('captcha/', include('captcha.urls')),
-    path('blogposts/', blog_views.BlogPostAPIList.as_view()),
+    path('blogposts/', blog_views.AllBlogPostAPI.as_view(),
+         name="allblogpostapi"),
+    path('blogpost/<int:blogpost_id>', blog_views.blogPostAPI,
+         name="blogpostapi"),
+    path('userpostlist/<int:user_id>', blog_views.userBlogPostListAPI, name="userpostlist")
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
