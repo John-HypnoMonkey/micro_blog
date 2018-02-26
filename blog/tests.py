@@ -31,7 +31,10 @@ class BlogPostViewsTestCase(TestCase):
         comments = my_response.context['comments']
         self.assertEqual(comments[0].pk, 1)
 
-        # Ensure that non-existent posts throw a 404
+    def test_BlogPost404(self):
+        """
+        Testing that non-existent posts throw a 404
+        """
         my_response = self.client.get(reverse("blog:post",
                                               kwargs={'blogpost_id': 999}))
         self.assertEqual(my_response.status_code, 404)
@@ -46,7 +49,17 @@ class BlogPostViewsTestCase(TestCase):
                                               kwargs={'blogpost_id': 1}))
         self.assertEqual(my_response.status_code, 200)
 
-    def test_UserBlogPostListiAPI(self):
+    def test_BlogPostAPI404(self):
+        my_response = self.client.get(reverse("blogpostapi",
+                                              kwargs={'blogpost_id': 999}))
+        self.assertEqual(my_response.status_code, 404)
+
+    def test_UserBlogPostListAPI(self):
         my_response = self.client.get(reverse("userpostlist",
                                               kwargs={'user_id': 1}))
         self.assertEqual(my_response.status_code, 200)
+
+    def test_UserBlogPostListAPI404(self):
+        my_response = self.client.get(reverse("userpostlist",
+                                              kwargs={'user_id': 999}))
+        self.assertEqual(my_response.status_code, 404)
