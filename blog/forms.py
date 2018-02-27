@@ -2,11 +2,12 @@ from django.contrib.auth.models import User
 from django import forms
 from captcha.fields import CaptchaField
 from .models import BlogPost, BlogPostComment
-
+import sys
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
-    captcha = CaptchaField()
+    if sys.argv[1] != 'test':
+        captcha = CaptchaField()
 
     class Meta:
         model = User
