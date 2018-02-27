@@ -3,8 +3,7 @@ from blog.models import BlogPost, BlogPostComment
 from django.contrib.auth.models import User
 from django.shortcuts import reverse
 from .forms import BlogPostCommentForm, BlogPostForm, UserForm
-import sys
-import captcha.conf.settings as captcha_settings
+
 
 # Create your tests here.
 class FormsTest(TestCase):
@@ -13,28 +12,49 @@ class FormsTest(TestCase):
     """
     fixtures = ['fake_db.json']
 
-    def test_UserForm(self):
+    def test_createUserForm_valid(self):
         """
-        Testing create new user's form
+        Testing a valid state for Create User Form
         """
-        form = UserForm(data={'username':'Anton',
-                              'email':'anton@anton.com',
-                              'password':'anton12345'})
+        form = UserForm(data={'username': 'Anton',
+                              'email': 'anton@test.com',
+                              'password': 'anton12345'})
         self.assertTrue(form.is_valid())
 
-    def test_addPostForm(self):
+    def test_createUserForm_invalid(self):
+        form = UserForm(data={'username': '', 'email': 'anton@test.com',
+                              'password': 'qwerty12345'})
+        self.assertFalse(form.is_valid())
+
+    def test_addPostForm_valid(self):
         """
-        Testing add post's form
+        Testing a valid state for Add BlogPost Form
         """
-        form = BlogPostForm(data={'title_text':'Title text',
-                          'content_text':'Content text'})
+        form = BlogPostForm(data={'title_text': 'Title text',
+                                  'content_text': 'Content text'})
         self.assertTrue(form.is_valid())
 
-    def test_addPostCommentForm(self):
+    def test_addPostForm_invalid(self):
         """
-        Testing add comment's form
+        Testing an invalid state for Add BlogPost Form
         """
-        form = BlogPostCommentForm(data={'content_text':'Content text'})
+        form = BlogPostForm(data={'title_text': 'Test title',
+                                  'content_text': ''})
+        self.assertFalse(form.is_valid())
+
+    def test_addPostCommentForm_valid(self):
+        """
+        Testing a valid state for Add PostComment Form
+        """
+        form = BlogPostCommentForm(data={'content_text': 'Content text'})
+        self.assertTrue(form.is_valid())
+
+    def test_addPostCommentForm_invalid(self):
+        """
+        Testing an invalid state for Add PostComment Form
+        """
+        form = BlogPostCommentForm(data={'content_text': ''})
+        self.assertFalse(form.is_valid())
 
 
 class BlogPostViewsTestCase(TestCase):
@@ -95,3 +115,6 @@ class BlogPostViewsTestCase(TestCase):
         my_response = self.client.get(reverse("userpostlist",
                                               kwargs={'user_id': 999}))
         self.assertEqual(my_response.status_code, 404)
+
+
+
