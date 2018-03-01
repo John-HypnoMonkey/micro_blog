@@ -57,8 +57,28 @@ class FormsTest(TestCase):
         self.assertFalse(form.is_valid())
 
 
+class UserTestCase(TestCase):
+    """
+    """
+    def test_RegisterNewUser(self):
+        """
+        """
+        user_count = User.objects.count()
+        my_response = self \
+            .client.post(reverse("blog:register"), {"username": "TestUser",
+                                                    "password": "qwerty123"})
+        # Status code must be 302 coz we redirect user after registration
+        self.assertEqual(my_response.status_code, 302)
+        self.assertEqual(User.objects.count(), user_count+1)
+
+
 class BlogPostViewsTestCase(TestCase):
+    """
+    """
     fixtures = ['fake_db.json']
+
+    def setUp(self):
+        self.client.force_login(User.objects.get_or_create(username='testuser')[0])
 
     def test_Index(self):
         """
@@ -91,6 +111,38 @@ class BlogPostViewsTestCase(TestCase):
                                               kwargs={'blogpost_id': 999}))
         self.assertEqual(my_response.status_code, 404)
 
+    def test_AddBlogPost(self):
+        """
+        """
+        post_count = BlogPost.objects.count()
+        my_response = self \
+            .client.post(reverse("blog:add-post"), {"title_text": "test",
+                                                    "content_text": "test"})
+
+        self.assertEqual(my_response.status_code, 302)
+        self.assertEqual(BlogPost.objects.count(), post_count + 1)
+
+
+class BlogPostCommentTestCase(TestCase):
+    fixtures = ['fake_db.json']
+
+    def setUp(self):
+        self.client.force_login(User.objects.get_or_create(username='testuser')[0])
+
+    def test_AddBlogPostComment(self):
+        """
+        """
+        comment_count = BlogPostComment.objects.count()
+        my_response = self \
+            .client.post(reverse("blog:post", kwargs={'blogpost_id': 1}),
+                         {"content_text": "testcomment"})
+        self.assertEqual(my_response.status_code, 302)
+        self.assertEqual(BlogPostComment.objects.count(), comment_count+1)
+
+
+class RestAPITestCase(TestCase):
+    fixtures = ['fake_db.json']
+
     # tests for RestAPI views
     def test_AllBlogPostAPI(self):
         my_response = self.client.get(reverse("allblogpostapi"))
@@ -115,6 +167,3 @@ class BlogPostViewsTestCase(TestCase):
         my_response = self.client.get(reverse("userpostlist",
                                               kwargs={'user_id': 999}))
         self.assertEqual(my_response.status_code, 404)
-
-
-
